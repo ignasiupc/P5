@@ -57,7 +57,9 @@ const std::vector<float>& InstrumentSeno::synthesize() {
       while (phaseIndex>2*3.1415926){
         phaseIndex -= 2*3.1415926;
       }
-      id = (int) phaseIndex / (2*3.1415926)*tbl.size();
+      const float TwoPi = 2.0f * 3.1415926f;
+      id = (int)(phaseIndex * (float)tbl.size() / TwoPi);
+      if (id >= (int)tbl.size()) id = 0;
       x[i] = A * tbl[id];
   }
 
