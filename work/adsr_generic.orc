@@ -1,0 +1,1 @@
+1	InstrumentDumb	ADSR_A=0.20; ADSR_D=0.30; ADSR_S=0.50; ADSR_R=0.40; N=40;
