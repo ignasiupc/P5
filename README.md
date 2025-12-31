@@ -51,9 +51,84 @@ Implemente el instrumento `Seno` tomando como modelo el `InstrumentDumb`. La se�
 mediante búsqueda de los valores en una tabla.
 
 - Incluya, a continuación, el código del fichero `seno.cpp` con los métodos de la clase Seno.
+ 
+En el nostre cas es diu 'instrument_seno.cpp'
+
+  ```cpp
+  #include "instrument_seno.h"
+  #include <math.h>
+  #include <iostream>
+
+  using namespace std;
+  using namespace upc;
+
+  InstrumentSeno::InstrumentSeno(const std::string &params)
+  : adsr(SamplingRate, params) {
+    
+      x.resize(BSIZE);
+      bActive = false;
+      
+      KeyValue kv(params); 
+      int N;
+      if (!kv.to_int("N",N)) 
+        N = 40;
+      tbl.resize(N);
+      float phase = 0;
+      float stepTbl = 2 * 3.1415926 / (float) N;
+      for (int i = 0; i < N; ++i) {
+          tbl[i] = sin(phase);
+          phase += stepTbl;
+      }
+      id = 0;
+  }
+
+
+  void InstrumentSeno::command(long cmd, long note, long vel) {
+      if (cmd == 9) {    
+          bActive = true;
+          adsr.start();
+          float freq = pow(2.0, (note - 69.0) / 12.0) * 440.0;
+          step = freq * 2.0 * 3.1415926 / SamplingRate;
+          A = vel / 127.0;
+          phaseIndex = 0;
+          id = 0;
+      }
+      else if (cmd == 8) { 
+          adsr.stop();
+      }
+      else if (cmd == 0) { 
+          adsr.end();
+      }
+  }
+
+  const std::vector<float>& InstrumentSeno::synthesize() {
+    if (!adsr.active()) {
+        x.assign(x.size(), 0.0f);
+        bActive = false;
+        return x;
+    }
+    else if (!bActive)
+      return x;
+    for (unsigned int i = 0; i < x.size(); ++i) {
+        phaseIndex += step;
+        while (phaseIndex>2*3.1415926){
+          phaseIndex -= 2*3.1415926;
+        }
+        id = (int) phaseIndex / (2*3.1415926)*tbl.size();
+        x[i] = A * tbl[id];
+    }
+
+    adsr(x);
+
+    return x;
+  }
+  ```
 - Explique qué método se ha seguido para asignar un valor a la señal a partir de los contenidos en la tabla,
   e incluya una gráfica en la que se vean claramente (use pelotitas en lugar de líneas) los valores de la
   tabla y los de la señal generada.
+
+  Es pren un cicle complet d’una ona sinusoidal i es guarda en una taula de mostres (look-up table) de mida **N**. Després, reproduint aquesta taula a una velocitat de lectura més alta o més baixa, podem modificar la freqüència del senyal i obtenir sons més **aguts** o més **greus** segons calgui.
+
 - Si ha implementado la síntesis por tabla almacenada en fichero externo, incluya a continuación el código
   del método `command()`.
 
