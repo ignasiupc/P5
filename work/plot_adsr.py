@@ -8,8 +8,8 @@ import scipy.io.wavfile as wav
 fitxers_audio = [
     # (wav, titol, A, D, S, R)
     ("work/generic_def.wav",    "Genèric",      0.20, 0.30, 0.50, 0.40),
-    ("work/perc_mant_def.wav",  "Percussiu 1",  0.005, 2.00, 0.00, 0.05),
-    ("work/perc_tall_def.wav",  "Percussiu 2",  0.005, 2.00, 0.00, 0.02),
+    ("work/perc_mant_def.wav",  "Percussiu Mantingut",  0.005, 2.00, 0.00, 0.05),
+    ("work/perc_tall_def.wav",  "Percussiu Tallat",  0.005, 2.00, 0.00, 0.02),
     ("work/plana_def.wav",      "Pla",          0.05, 0.08, 0.80, 0.07),
 ]
 
