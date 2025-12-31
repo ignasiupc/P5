@@ -2,109 +2,73 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
 
-# =========================
-# CONFIG DEL TEU CAS
-# =========================
+# Paràmetres comuns (modificats per cada instrument)
+inici_sustain = 0.73
+
+# Fitxers d'àudio i títols
 fitxers_audio = [
-    # (wav, titol, A, D, S, R)
-    ("work/generic_def.wav",    "Genèric",      0.20, 0.30, 0.50, 0.40),
-    ("work/perc_mant_def.wav",  "Percussiu Mantingut",  0.005, 2.00, 0.00, 0.05),
-    ("work/perc_tall_def.wav",  "Percussiu Tallat",  0.005, 2.00, 0.00, 0.02),
-    ("work/plana_def.wav",      "Pla",          0.05, 0.08, 0.80, 0.07),
+    ("generic_def.wav", "Genèric"),
+    ("perc_mant_def.wav", "Mantingut"),
+    ("perc_tall_def.wav", "Tallat"),
+    ("plana_def.wav", "Pla")
 ]
 
-THRESH = 0.01      # 1% per detectar inici/final del so
-SMOOTH_MS = 8      # suavitzat per detectar onset/offset
+# Crear la figura
+plt.figure(figsize=(14, 10))
 
-# =========================
-# HELPERS
-# =========================
-def to_mono(x):
-    return x.mean(axis=1) if x.ndim > 1 else x
+for i, (nom_fitxer, titol) in enumerate(fitxers_audio, 1):
 
-def smooth_abs(x, fs, smooth_ms=8):
-    ax = np.abs(x.astype(np.float32))
-    win = max(1, int((smooth_ms/1000.0) * fs))
-    k = np.ones(win, dtype=np.float32) / win
-    return np.convolve(ax, k, mode="same")
+    if i == 1:  # Genèric
+        atac_inici, atac_fi = 0.5, 0.55
+        deca_inici, deca_fi = 0.55, 0.65
+        nivell_sustain = 2460
+        release_inici, release_fi = 1.0, 1.1
 
-def find_on_off(env, fs, thresh_ratio=0.01):
-    m = env.max() if env.max() > 0 else 1.0
-    mask = env > (thresh_ratio * m)
-    if not np.any(mask):
-        return 0.0, (len(env)-1)/fs
-    i0 = int(np.argmax(mask))
-    i1 = int(len(mask) - 1 - np.argmax(mask[::-1]))
-    return i0/fs, i1/fs
+    elif i == 2:  # Percussiu 1
+        atac_inici, atac_fi = 0.5, 0.6
+        deca_inici, deca_fi = 0.6, 0.7
+        nivell_sustain = 0
+        release_inici, release_fi = 0.01, 0.02
 
-# =========================
-# PLOT
-# =========================
-plt.figure(figsize=(14, 9))
+    elif i == 3:  # Percussiu 2
+        atac_inici, atac_fi = 0.5, 0.8
+        deca_inici, deca_fi = 0.8, 1.0
+        nivell_sustain = 0
+        release_inici, release_fi = 1.0, 1.1
 
-for i, (nom_fitxer, titol, A, D, S, R) in enumerate(fitxers_audio, 1):
-    fs, dades = wav.read(nom_fitxer)
-    dades = to_mono(dades)
+    elif i == 4:  # Pla
+        atac_inici, atac_fi = 0.5, 0.52
+        deca_inici, deca_fi = 0.01, 0.02
+        nivell_sustain = 12269
+        release_inici, release_fi = 1.0, 1.1
 
-    # temps
-    temps = np.arange(len(dades)) / fs
+    taxa_mostreig, dades = wav.read(nom_fitxer)
 
-    # envolvent per detectar onset/offset
-    env = smooth_abs(dades, fs, SMOOTH_MS)
-    t_on, t_off = find_on_off(env, fs, THRESH)
+    # Si és estèreo, fem mitjana per passar-ho a mono
+    if dades.ndim > 1:
+        dades = dades.mean(axis=1)
 
-    # límits de fases teòrics (clamp per seguretat)
-    atac_inici = t_on
-    atac_fi    = min(t_on + A, t_off)
+    temps = np.arange(len(dades)) / taxa_mostreig
 
-    deca_inici = atac_fi
-    deca_fi    = min(deca_inici + D, t_off)
+    # Índexs per fases ADSR
+    indices_atac = (temps >= atac_inici) & (temps <= atac_fi)
+    indices_deca = (temps >= deca_inici) & (temps <= deca_fi)
+    index_sustain = int(inici_sustain * taxa_mostreig)
+    indices_release = (temps >= release_inici) & (temps <= release_fi)
 
-    release_fi = t_off
-    release_inici = max(t_on, t_off - R)
-
-    # sustain entre final decay i inici release (si existeix)
-    sustain_inici = deca_fi
-    sustain_fi    = max(sustain_inici, release_inici)
-
-    # nivell sustain (en unitats d’amplitud del wav)
-    peak = float(np.max(np.abs(dades))) if np.max(np.abs(dades)) > 0 else 1.0
-    nivell_sustain = S * peak
-
-    # màscares
-    idx_atac    = (temps >= atac_inici) & (temps <= atac_fi)
-    idx_deca    = (temps >= deca_inici) & (temps <= deca_fi)
-    idx_release = (temps >= release_inici) & (temps <= release_fi)
-    idx_sus     = (temps >= sustain_inici) & (temps <= sustain_fi)
-
+    # Subgràfic
     plt.subplot(2, 2, i)
-
-    # senyal d’àudio (línia fina)
-    plt.plot(temps, dades, label="Senyal d'àudio", alpha=0.35, linewidth=1.0)
-
-    # FASES (estil “blocs” com el dels teus companys)
-    if np.any(idx_atac):
-        plt.fill_between(temps[idx_atac], dades[idx_atac], -dades[idx_atac],
-                         color="red", alpha=0.85, label="Atac")
-    if np.any(idx_deca):
-        plt.fill_between(temps[idx_deca], dades[idx_deca], -dades[idx_deca],
-                         color="blue", alpha=0.85, label="Decaiguda")
-    if np.any(idx_sus) and S > 0:
-        plt.fill_between(temps[idx_sus], nivell_sustain, -nivell_sustain,
-                         color="#7FB3D5", alpha=0.65, label="Sosteniment")
-    # línia discontínua del sustain (encara que sigui 0)
-    plt.axhline(y=nivell_sustain, color="green", linestyle="--", label="Sosteniment")
-
-    if np.any(idx_release):
-        plt.fill_between(temps[idx_release], dades[idx_release], -dades[idx_release],
-                         color="green", alpha=0.85, label="Alliberament")
+    plt.plot(temps, dades, label='Senyal d\'àudio', alpha=0.7)
+    plt.plot(temps[indices_atac], dades[indices_atac], color='red', label='Atac')
+    plt.plot(temps[indices_deca], dades[indices_deca], color='blue', label='Decaiguda')
+    plt.axhline(y=nivell_sustain, color='green', linestyle='--', label='Sosteniment')
+    plt.plot(temps[indices_release], dades[indices_release], color='green', label='Alliberament')
 
     plt.title(titol)
     plt.xlabel("Temps (s)")
     plt.ylabel("Amplitud")
     plt.grid(True)
-    plt.legend(loc="best")
+    plt.legend()
 
 plt.tight_layout()
-plt.savefig("work/adsr_grafiques.png", dpi=200)
 plt.show()
