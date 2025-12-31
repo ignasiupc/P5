@@ -2,109 +2,85 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
 
-# =========================
-# CONFIG DEL TEU CAS
-# =========================
+# Fitxers d'àudio i títols (els teus)
 fitxers_audio = [
-    # (wav, titol, A, D, S, R)
-    ("work/generic_def.wav",    "Genèric",      0.20, 0.30, 0.50, 0.40),
-    ("work/perc_mant_def.wav",  "Percussiu Mantingut",  0.005, 2.00, 0.00, 0.05),
-    ("work/perc_tall_def.wav",  "Percussiu Tallat",  0.005, 2.00, 0.00, 0.02),
-    ("work/plana_def.wav",      "Pla",          0.05, 0.08, 0.80, 0.07),
+    ("work/generic_def.wav",    "Genèric"),
+    ("work/perc_mant_def.wav",  "Percussiu mantingut"),
+    ("work/perc_tall_def.wav",  "Percussiu tallat"),
+    ("work/plana_def.wav",      "Pla")
 ]
 
-THRESH = 0.01      # 1% per detectar inici/final del so
-SMOOTH_MS = 8      # suavitzat per detectar onset/offset
+plt.figure(figsize=(14, 10))
 
-# =========================
-# HELPERS
-# =========================
-def to_mono(x):
-    return x.mean(axis=1) if x.ndim > 1 else x
+for i, (nom_fitxer, titol) in enumerate(fitxers_audio, 1):
 
-def smooth_abs(x, fs, smooth_ms=8):
-    ax = np.abs(x.astype(np.float32))
-    win = max(1, int((smooth_ms/1000.0) * fs))
-    k = np.ones(win, dtype=np.float32) / win
-    return np.convolve(ax, k, mode="same")
+    # --- ADSR segons els teus .orc ---
+    if i == 1:  # Genèric
+        A, D, S, R = 0.20, 0.30, 0.50, 0.40
+    elif i == 2:  # Percussiu mantingut
+        A, D, S, R = 0.005, 2.00, 0.00, 0.05
+    elif i == 3:  # Percussiu tallat
+        A, D, S, R = 0.005, 2.00, 0.00, 0.02
+    elif i == 4:  # Pla
+        A, D, S, R = 0.05, 0.08, 0.80, 0.07
 
-def find_on_off(env, fs, thresh_ratio=0.01):
-    m = env.max() if env.max() > 0 else 1.0
-    mask = env > (thresh_ratio * m)
-    if not np.any(mask):
-        return 0.0, (len(env)-1)/fs
-    i0 = int(np.argmax(mask))
-    i1 = int(len(mask) - 1 - np.argmax(mask[::-1]))
-    return i0/fs, i1/fs
+    taxa_mostreig, dades = wav.read(nom_fitxer)
 
-# =========================
-# PLOT
-# =========================
-plt.figure(figsize=(14, 9))
+    # Si és estèreo, fem mitjana per passar-ho a mono
+    if dades.ndim > 1:
+        dades = dades.mean(axis=1)
 
-for i, (nom_fitxer, titol, A, D, S, R) in enumerate(fitxers_audio, 1):
-    fs, dades = wav.read(nom_fitxer)
-    dades = to_mono(dades)
+    temps = np.arange(len(dades)) / taxa_mostreig
 
-    # temps
-    temps = np.arange(len(dades)) / fs
+    # --- Detectar inici i final reals del so (per no posar 0.5 "a ull") ---
+    absx = np.abs(dades.astype(np.float32))
+    mx = absx.max() if absx.max() > 0 else 1.0
+    thr = 0.02 * mx  # 2% del pic (puja-ho a 0.05 si tens clics)
+    mask = absx > thr
 
-    # envolvent per detectar onset/offset
-    env = smooth_abs(dades, fs, SMOOTH_MS)
-    t_on, t_off = find_on_off(env, fs, THRESH)
+    if np.any(mask):
+        idx_on = np.argmax(mask)
+        idx_off = len(mask) - 1 - np.argmax(mask[::-1])
+        inici_nota = temps[idx_on]
+        fi_nota = temps[idx_off]
+    else:
+        inici_nota = 0.0
+        fi_nota = temps[-1]
 
-    # límits de fases teòrics (clamp per seguretat)
-    atac_inici = t_on
-    atac_fi    = min(t_on + A, t_off)
+    # --- Temps de fases ADSR (a partir del teu A D S R) ---
+    atac_inici = inici_nota
+    atac_fi = min(atac_inici + A, fi_nota)
 
     deca_inici = atac_fi
-    deca_fi    = min(deca_inici + D, t_off)
+    deca_fi = min(deca_inici + D, fi_nota)
 
-    release_fi = t_off
-    release_inici = max(t_on, t_off - R)
+    # Sustained level (mateix criteri que els teus companys: amplitud en unitats del wav)
+    nivell_sustain = S * mx
 
-    # sustain entre final decay i inici release (si existeix)
-    sustain_inici = deca_fi
-    sustain_fi    = max(sustain_inici, release_inici)
+    release_fi = fi_nota
+    release_inici = max(fi_nota - R, inici_nota)
 
-    # nivell sustain (en unitats d’amplitud del wav)
-    peak = float(np.max(np.abs(dades))) if np.max(np.abs(dades)) > 0 else 1.0
-    nivell_sustain = S * peak
+    # Índexs per fases ADSR
+    indices_atac = (temps >= atac_inici) & (temps <= atac_fi)
+    indices_deca = (temps >= deca_inici) & (temps <= deca_fi)
+    indices_release = (temps >= release_inici) & (temps <= release_fi)
 
-    # màscares
-    idx_atac    = (temps >= atac_inici) & (temps <= atac_fi)
-    idx_deca    = (temps >= deca_inici) & (temps <= deca_fi)
-    idx_release = (temps >= release_inici) & (temps <= release_fi)
-    idx_sus     = (temps >= sustain_inici) & (temps <= sustain_fi)
-
+    # Subgràfic
     plt.subplot(2, 2, i)
+    plt.plot(temps, dades, label="Senyal d'àudio", alpha=0.7)
 
-    # senyal d’àudio (línia fina)
-    plt.plot(temps, dades, label="Senyal d'àudio", alpha=0.35, linewidth=1.0)
-
-    # FASES (estil “blocs” com el dels teus companys)
-    if np.any(idx_atac):
-        plt.fill_between(temps[idx_atac], dades[idx_atac], -dades[idx_atac],
-                         color="red", alpha=0.85, label="Atac")
-    if np.any(idx_deca):
-        plt.fill_between(temps[idx_deca], dades[idx_deca], -dades[idx_deca],
-                         color="blue", alpha=0.85, label="Decaiguda")
-    if np.any(idx_sus) and S > 0:
-        plt.fill_between(temps[idx_sus], nivell_sustain, -nivell_sustain,
-                         color="#7FB3D5", alpha=0.65, label="Sosteniment")
-    # línia discontínua del sustain (encara que sigui 0)
+    # Mateixa manera de “pintar” que el codi dels teus companys
+    plt.plot(temps[indices_atac], dades[indices_atac], color="red", label="Atac")
+    plt.plot(temps[indices_deca], dades[indices_deca], color="blue", label="Decaiguda")
     plt.axhline(y=nivell_sustain, color="green", linestyle="--", label="Sosteniment")
-
-    if np.any(idx_release):
-        plt.fill_between(temps[idx_release], dades[idx_release], -dades[idx_release],
-                         color="green", alpha=0.85, label="Alliberament")
+    plt.plot(temps[indices_release], dades[indices_release], color="green", label="Alliberament")
 
     plt.title(titol)
     plt.xlabel("Temps (s)")
     plt.ylabel("Amplitud")
     plt.grid(True)
-    plt.legend(loc="best")
+    plt.legend()
 
 plt.tight_layout()
-plt.savefig("work/adsr_grafiques.png", dpi=200)
+plt.savefig("work/adsr_grafiques_amics.png", dpi=200)
 plt.show()

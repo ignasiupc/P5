@@ -42,6 +42,9 @@ Para los cuatro casos, deberá incluir una gráfica en la que se visualice clara
 añadir la información necesaria para su correcta interpretación, aunque esa información puede reducirse a
 colocar etiquetas y títulos adecuados en la propia gráfica (se valorará positivamente esta alternativa).
 
+Després d’inspirar-nos en **dumb.orc**, generem quatre fitxers **.orc** ajustant els paràmetres de l’envolvent ADSR segons les especificacions de l’enunciat: **adsr_generic.orc**, **adsr_perc_mant.orc**, **adsr_perc_tall.orc** i **adsr_plana.orc**. Tot seguit, aprofitem que ja disposem de **doremi.sco** i l’executem amb cadascun dels quatre instruments per comparar de manera ràpida les diferències de comportament, obtenint els primers **.wav** corresponents. A continuació, per poder analitzar l’ADSR amb més precisió, creem quatre **scores** curts (un per a cada cas) i generem els **.wav definitius** que utilitzarem a les gràfiques: **generic_def.wav**, **perc_mant_def.wav**, **perc_tall_def.wav** i **plana_def.wav**.
+
+
 ### Instrumentos Dumb y Seno.
 
 Implemente el instrumento `Seno` tomando como modelo el `InstrumentDumb`. La señal **deberá** formarse
