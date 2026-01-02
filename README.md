@@ -239,6 +239,78 @@ En el nostre cas es diu 'instrument_seno.cpp'
   el efecto, e indique, a continuación, la orden necesaria para generar los ficheros de audio usando el
   programa `synth`.
 
+  ## Efecto adicional implementado: **Gain** (control de volumen global)
+
+En este apartado hemos incorporado un efecto adicional muy simple pero útil: un **control de ganancia global** (*gain*), equivalente a un “volumen master” aplicado a la señal final generada por el sintetizador.
+
+A diferencia de efectos como trémolo o vibrato (que modulan parámetros internos de la señal), el **gain** actúa como un **post-procesado**: multiplica la forma de onda de salida por un factor constante `g`, escalando únicamente su amplitud. Este control está disponible en `synth` mediante la opción `-g/--gain` (ganancia aplicada a la forma de onda de salida). :contentReference[oaicite:3]{index=3}
+
+---
+
+### EFECTO "GAIN" (Ganancia) 
+
+## Estructura de ficheros utilizada
+
+Hemos trabajado dentro de:
+
+- `~/PAV/P5/work/EFECTOS/GAIN/`
+
+Ficheros creados:
+
+- `gain_instrument.orc`  
+  Instrumento base (sinusoidal) configurado con `InstrumentDumb` y envolvente ADSR para obtener una nota estable.
+
+  
+
+- `gain_score.sco`  
+  Partitura mínima con una única nota sostenida (A4, MIDI 69) para comparar distintas ganancias de salida.
+
+- `plot_gain.py`  
+  Script en Python que genera una figura comparativa entre dos WAV (dos valores de `g`), incluyendo:
+  - un **zoom temporal** para ver que el periodo de la sinusoide se mantiene,
+  - una **envolvente RMS móvil** para visualizar el escalado en amplitud sin que la sinusoide “aplane” la gráfica,
+  - un resumen numérico (pico y RMS) para cuantificar el efecto.
+
+---
+
+### Generación de audio con distintas ganancias
+
+Para apreciar el efecto, hemos generado dos ficheros de audio a partir del mismo instrumento y la misma partitura, variando únicamente el parámetro global `g`:
+
+```bash
+synth -g 0.20 gain_instrument.orc gain_score.sco gain_g020.wav
+synth -g 0.80 gain_instrument.orc gain_score.sco gain_g080.wav
+
+
+### Interpretación esperada
+
+- Con `g = 0.20`, el audio se escucha claramente más bajo.  
+- Con `g = 0.80`, el audio se escucha más fuerte, manteniendo el mismo tono.
+
+---
+
+### Visualización del efecto en una gráfica
+
+Hemos generado la figura comparativa con:
+
+```bash
+python3 plot_gain.py \
+  --wav1 gain_g020.wav --label1 "g=0.20" \
+  --wav2 gain_g080.wav --label2 "g=0.80" \
+  --out gain_compare.png
+
+Qué se observa en la figura
+
+En el panel de zoom, ambas señales mantienen el mismo periodo (misma frecuencia), pero la amplitud del caso g = 0.80 es mayor.
+
+En el panel de RMS móvil, la curva del caso g = 0.80 queda por encima de la de g = 0.20, mostrando de forma clara el escalado global.
+
+Las medidas de pico y RMS aumentan aproximadamente de forma proporcional con g.
+
+Figura (Gain comparativo)
+
+(insertar aquí gain_compare.png)
+
 ### Síntesis FM.
 
 Construya un instrumento de síntesis FM, según las explicaciones contenidas en el enunciado y el artículo
