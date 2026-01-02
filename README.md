@@ -568,6 +568,14 @@ Resultados:
 - `work/doremi/clarinete.wav`
 - `work/doremi/campana.wav` (y, por compatibilidad con el enunciado, también `work/doremi/campana.work`)
 
+CLARINETE:
+
+<audio controls src="work/doremi/clarinete.wav" title="Title"></audio>
+
+CAMPANA:
+
+<audio controls src="work/doremi/campana.wav" title="Title"></audio>
+
 ### Orquestación usando el programa synth.
 
 Use el programa `synth` para generar canciones a partir de su partitura MIDI. Como mínimo, deberá incluir la
@@ -588,6 +596,9 @@ Ficheros colocados en `work/music/`:
 - `toystory.orc` (instrumentos)
 - `toystory.wav` (resultado)
 
+<audio controls src="work/music/toystory.wav" title="Title"></audio>
+
+
 La orquestación asigna:
 
 - Canal 1: solista con `InstrumentFM`
@@ -606,6 +617,8 @@ Ficheros colocados en `work/music/`:
 - `Hawaii5-0.sco` (partitura)
 - `hawaii5_0.orc` (instrumentos)
 - `hawaii5_0.wav` (resultado)
+
+<audio controls src="work/music/hawaii5_0.wav" title="Title"></audio>
 
 Comando para generar la señal (desde la raíz del proyecto):
 
