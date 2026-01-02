@@ -1,7 +1,7 @@
 PAV - P5: síntesis musical polifónica
 =====================================
 
-Obtenga su copia del repositorio de la práctica accediendo a [Práctica 5](https://github.com/albino-pav/P5) 
+Obtenga su copia del repositorio de la práctica accediendo a [Práctica 5](https://github.com/albino-pav/P5)
 y pulsando sobre el botón `Fork` situado en la esquina superior derecha. A continuación, siga las
 instrucciones de la [Práctica 2](https://github.com/albino-pav/P2) para crear una rama con el apellido de
 los integrantes del grupo de prácticas, dar de alta al resto de integrantes como colaboradores del proyecto
@@ -17,10 +17,10 @@ los ficheros entregados deberán estar en condiciones de ser ejecutados con sól
 A modo de memoria de la práctica, complete, en este mismo documento y usando el formato *markdown*, los
 ejercicios indicados.
 
-Ejercicios.
------------
+Ejercicios
+----------
 
-### Envolvente ADSR.
+### Envolvente ADSR
 
 Tomando como modelo un instrumento sencillo (puede usar el InstrumentDumb), genere cuatro instrumentos que
 permitan visualizar el funcionamiento de la curva ADSR.
@@ -29,11 +29,11 @@ permitan visualizar el funcionamiento de la curva ADSR.
   parámetros: ataque (A), caída (D), mantenimiento (S) y liberación (R).
 * Un instrumento *percusivo*, como una guitarra o un piano, en el que el sonido tenga un ataque rápido, no
   haya mantenimiemto y el sonido se apague lentamente.
-  - Para un instrumento de este tipo, tenemos dos situaciones posibles:
+  * Para un instrumento de este tipo, tenemos dos situaciones posibles:
     * El intérprete mantiene la nota *pulsada* hasta su completa extinción.
     * El intérprete da por finalizada la nota antes de su completa extinción, iniciándose una disminución
-	  abrupta del sonido hasta su finalización.
-  - Debera representar en esta memoria **ambos** posibles finales de la nota.
+      abrupta del sonido hasta su finalización.
+  * Debera representar en esta memoria **ambos** posibles finales de la nota.
 * Un instrumento *plano*, como los de cuerdas frotadas (violines y semejantes) o algunos de viento. En
   ellos, el ataque es relativamente rápido hasta alcanzar el nivel de mantenimiento (sin sobrecarga), y la
   liberación también es bastante rápida.
@@ -42,25 +42,25 @@ Para los cuatro casos, deberá incluir una gráfica en la que se visualice clara
 añadir la información necesaria para su correcta interpretación, aunque esa información puede reducirse a
 colocar etiquetas y títulos adecuados en la propia gráfica (se valorará positivamente esta alternativa).
 
-# Envolvente ADSR — Generació d’instruments i figures (P5)
+## Envolvente ADSR — Generació d'instruments i figures (P5)
 
 Aquest apartat mostra la implementació i la visualització de la corba **ADSR** (*Attack, Decay, Sustain, Release*) a partir d’un instrument base senzill (**InstrumentDumb**).  
 S’han definit **quatre instruments** amb comportaments típics (genèric, percussiu i pla) i s’han generat **gràfiques normalitzades** (amplitud entre 0 i 1) per entendre clarament el paper de cada paràmetre.
 
 ---
 
-## Objectiu
+### Objectiu
 
-- Definir quatre instruments amb **envolvents ADSR diferenciades** segons l’enunciat.
-- Generar figures on es visualitzin clarament les fases: **Atac (A)**, **Caiguda (D)**, **Manteniment (S)** i **Alliberament (R)**.
-- Aportar la informació mínima necessària per interpretar-les (títols, eixos i etiquetes).
+* Definir quatre instruments amb **envolvents ADSR diferenciades** segons l'enunciat.
+* Generar figures on es visualitzin clarament les fases: **Atac (A)**, **Caiguda (D)**, **Manteniment (S)** i **Alliberament (R)**.
+* Aportar la informació mínima necessària per interpretar-les (títols, eixos i etiquetes).
 
 ---
 
-## Estructura de fitxers
+### Estructura de fitxers
 
 | Tipus | Fitxer / carpeta | Descripció |
-|------|-------------------|------------|
+| ----- | ---------------- | ---------- |
 | Definició instruments | `adsr_instruments.orc` | Conté els 4 instruments basats en *InstrumentDumb* amb ADSR diferenciades |
 | Partitura | `adsr_score.sco` | Seqüència de notes per executar cada instrument i generar el so |
 | Script figures | `work/grafica_ignasi.py` | Genera les figures ADSR normalitzades i les guarda en PNG |
@@ -68,7 +68,7 @@ S’han definit **quatre instruments** amb comportaments típics (genèric, perc
 
 ---
 
-## Instruments implementats
+### Instruments implementats
 
 A continuació es descriu cadascun dels instruments creats, indicant la seva **caracterització** i el **fitxer d’imatge** associat.
 
@@ -76,31 +76,33 @@ A continuació es descriu cadascun dels instruments creats, indicant la seva **c
 
 ---
 
-### 1) ADSR genèrica (visualització pedagògica de paràmetres)
+#### 1) ADSR genèrica (visualització pedagògica de paràmetres)
 
 Instrument dissenyat per distingir amb claredat totes les fases:
-- **Atac** progressiu fins al pic.
-- **Caiguda** fins al nivell de **manteniment**.
-- **Manteniment** estable mentre la nota està activa.
-- **Alliberament** gradual fins a 0.
 
-- Definició: `adsr_instruments.orc` (Instrument **1**)  
-- Figura: `work/figs/adsr_generica.png`
+* **Atac** progressiu fins al pic.
+* **Caiguda** fins al nivell de **manteniment**.
+* **Manteniment** estable mentre la nota està activa.
+* **Alliberament** gradual fins a 0.
+
+* Definició: `adsr_instruments.orc` (Instrument **1**)
+* Figura: `work/figs/adsr_generica.png`
 
 **⬇️ Figura**
 ![alt text](<work/Envolvente ADSR/figs/adsr_generica.png>)
 
 ---
 
-### 2) Instrument percussiu (guitarra/piano) — atac ràpid, sense manteniment, extinció lenta
+#### 2) Instrument percussiu (guitarra/piano) — atac ràpid, sense manteniment, extinció lenta
 
 Model típic de so percussiu:
-- **Atac molt curt** (transitori inicial marcat).
-- **Sense sosteniment** (S ≈ 0).
-- El so es **va apagant progressivament** fins a desaparèixer.
 
-- Definició: `adsr_instruments.orc` (Instrument **2**)  
-- Figura: `work/figs/percusivo_nota_mantenida_hasta_extinguir.png`
+* **Atac molt curt** (transitori inicial marcat).
+* **Sense sosteniment** (S ≈ 0).
+* El so es **va apagant progressivament** fins a desaparèixer.
+
+* Definició: `adsr_instruments.orc` (Instrument **2**)
+* Figura: `work/figs/percusivo_nota_mantenida_hasta_extinguir.png`
 
 **⬇️ Figura:**  
 ![alt text](<work/Envolvente ADSR/figs/percusivo_nota_mantenida_hasta_extinguir.png>)
@@ -108,15 +110,16 @@ Model típic de so percussiu:
 
 ---
 
-### 3) Instrument percussiu tallat — finalització abans de l’extinció completa
+#### 3) Instrument percussiu tallat — finalització abans de l'extinció completa
 
 Mateix caràcter percussiu però amb final anticipat:
-- **Atac molt curt**.
-- **Sense sosteniment** (S ≈ 0).
-- La nota finalitza abans de desaparèixer sola, i entra abans en **alliberament**.
 
-- Definició: `adsr_instruments.orc` (Instrument **3**)  
-- Figura: `work/figs/percusivo_suelta_temprana_con_corte.png`
+* **Atac molt curt**.
+* **Sense sosteniment** (S ≈ 0).
+* La nota finalitza abans de desaparèixer sola, i entra abans en **alliberament**.
+
+* Definició: `adsr_instruments.orc` (Instrument **3**)
+* Figura: `work/figs/percusivo_suelta_temprana_con_corte.png`
 
 **⬇️ Figura:**  
 ![alt text](<work/Envolvente ADSR/figs/percusivo_suelta_temprana_con_corte.png>)
@@ -124,15 +127,16 @@ Mateix caràcter percussiu però amb final anticipat:
 
 ---
 
-### 4) Instrument pla (cordes frotades / vent) — atac fins a S sense sobrecàrrega, alliberament ràpid
+#### 4) Instrument pla (cordes frotades / vent) — atac fins a S sense sobrecàrrega, alliberament ràpid
 
-Model típic d’instruments sostinguts (p. ex. violí o vent):
-- **Atac relativament ràpid** fins al nivell de sosteniment, **sense sobrepassar-lo**.
-- **Manteniment** clar i estable.
-- **Alliberament** també **ràpid** en deixar la nota.
+Model típic d'instruments sostinguts (p. ex. violí o vent):
 
-- Definició: `adsr_instruments.orc` (Instrument **4**)  
-- Figura: `work/figs/instrumento_plano_cuerdas_frotadas_o_viento.png`
+* **Atac relativament ràpid** fins al nivell de sosteniment, **sense sobrepassar-lo**.
+* **Manteniment** clar i estable.
+* **Alliberament** també **ràpid** en deixar la nota.
+
+* Definició: `adsr_instruments.orc` (Instrument **4**)
+* Figura: `work/figs/instrumento_plano_cuerdas_frotadas_o_viento.png`
 
 **⬇️ Figura:**  
 ![alt text](<work/Envolvente ADSR/figs/instrumento_plano_cuerdas_frotadas_o_viento.png>)
