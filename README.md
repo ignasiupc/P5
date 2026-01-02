@@ -238,6 +238,23 @@ En el nostre cas es diu 'instrument_seno.cpp'
   sinusoidal. Deberá explicar detalladamente cómo se manifiestan los parámetros del efecto (frecuencia e
   índice de modulación) en la señal generada (se valorará que la explicación esté contenida en las propias
   gráficas, sin necesidad de *literatura*).
+Para generar estas figuras se ha usado una **señal base sinusoidal** (nota A4, MIDI 69) y se ha activado
+cada efecto desde la partitura:
+
+- En `work/EFECTOS/tremolo.sco` se enciende el efecto **1 (Tremolo)** y en `work/EFECTOS/vibrato.sco` el
+  efecto **2 (Vibrato)**.
+- Los parámetros se fijan en `work/EFECTOS/effects.orc`: para trémolo `A` (profundidad de modulación en
+  amplitud) y `f_m` (frecuencia del LFO), y para vibrato `I` (índice de modulación en **semitonos**) y
+  `f_m` (frecuencia del LFO).
+
+Las gráficas se han generado a partir del WAV resultante con `work/EFECTOS/grafica.py`:
+
+- **Trémolo**: se calcula la **envolvente** (|x(t)| suavizada) y ahí se observa que `f_m` aparece como la
+  **periodicidad** del patrón, mientras que `A` determina la **profundidad** (diferencia entre máximos y
+  mínimos de la envolvente).
+- **Vibrato**: se estima la **frecuencia instantánea** $f_{inst}(t)$ (vía señal analítica/Hilbert) y se
+  visualiza cómo `f_m` marca la periodicidad de la oscilación y `I` la **desviación** de frecuencia (Δf)
+  alrededor de la frecuencia central.
 
 ![alt text](work/EFECTOS/figs/fig_tremolo.png)
 
@@ -566,15 +583,8 @@ Generación de las escalas:
 Resultados:
 
 - `work/doremi/clarinete.wav`
-- `work/doremi/campana.wav` (y, por compatibilidad con el enunciado, también `work/doremi/campana.work`)
+- `work/doremi/campana.wav` 
 
-CLARINETE:
-
-<audio controls src="work/doremi/clarinete.wav" title="Title"></audio>
-
-CAMPANA:
-
-<audio controls src="work/doremi/campana.wav" title="Title"></audio>
 
 ### Orquestación usando el programa synth.
 
