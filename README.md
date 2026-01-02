@@ -249,15 +249,17 @@ En el nostre cas es diu 'instrument_seno.cpp'
   el efecto, e indique, a continuación, la orden necesaria para generar los ficheros de audio usando el
   programa `synth`.
 
-  ## Efecto adicional implementado: **Gain** (control de volumen global)
+---
+
+  # Efecto adicional implementado: **Gain** (control de volumen global)
 
 En este apartado hemos incorporado un efecto adicional muy simple pero útil: un **control de ganancia global** (*gain*), equivalente a un “volumen master” aplicado a la señal final generada por el sintetizador.
 
 A diferencia de efectos como trémolo o vibrato (que modulan parámetros internos de la señal), el **gain** actúa como un **post-procesado**: multiplica la forma de onda de salida por un factor constante `g`, escalando únicamente su amplitud. Este control está disponible en `synth` mediante la opción `-g/--gain` (ganancia aplicada a la forma de onda de salida). :contentReference[oaicite:3]{index=3}
 
----
 
-### EFECTO "GAIN" (Ganancia) 
+
+
 
 ## Estructura de ficheros utilizada
 
@@ -485,6 +487,55 @@ deberá venir expresado en semitonos.
 
 - Use el instrumento para generar un vibrato de *parámetros razonables* e incluya una gráfica en la que se
   vea, claramente, la correspondencia entre los valores `N1`, `N2` e `I` con la señal obtenida.
+
+#### Vibrato mediante FM (InstrumentFM)
+
+Para obtener **vibrato** (modulación *lenta* de la frecuencia), se configura el modulador como un **LFO**:
+
+- `fc = N1·f0` (portador)
+- `fm = N2·f0` (modulador; para vibrato debe ser pequeño)
+- `I` se especifica en **semitonos** y controla la profundidad de la desviación.
+
+Ficheros usados:
+
+- `work/fm/fm_vibrato.orc`
+- `work/fm/fm_vibrato.sco`
+
+Generación del audio y de la figura:
+
+```bash
+./build/release/src/synth work/fm/fm_vibrato.orc work/fm/fm_vibrato.sco work/fm/fm_vibrato.wav
+python3 work/fm/plot_fm_vibrato.py work/fm/fm_vibrato.wav --midi 69 --N1 1 --N2 0.013636 --I 0.30 --out work/fm/figs/fm_vibrato.png
+```
+
+En la gráfica inferior se muestra la **frecuencia instantánea estimada** (puntos) y la **teórica** esperada (línea),
+dejando visible la correspondencia entre `N1` (centro en `fc`), `N2` (velocidad `fm`) e `I` (desviación en Hz).
+
+![alt text](work/fm/figs/fm_vibrato.png)
+
+#### Comparativa (3 casos representativos)
+
+Para comparar de forma directa el efecto de los parámetros sin generar demasiadas figuras, se usa una
+única comparativa en **semitonos** ($12\log_2(f_{inst}/f_c)$, misma unidad que `I`) con 3 casos:
+
+- **Base**: `I=0.30`, `N2=0.013636` (vibrato ~6 Hz)
+- **Más profundidad**: `I=0.60`, `N2=0.013636`
+- **Más rápido**: `I=0.30`, `N2=0.015909` (vibrato ~7 Hz)
+
+```bash
+./build/release/src/synth work/fm/fm_vibrato.orc     work/fm/fm_vibrato.sco work/fm/fm_vibrato.wav
+./build/release/src/synth work/fm/fm_vibrato_I060.orc work/fm/fm_vibrato.sco work/fm/fm_vibrato_I060.wav
+./build/release/src/synth work/fm/fm_vibrato_fm7.orc  work/fm/fm_vibrato.sco work/fm/fm_vibrato_fm7.wav
+
+python3 work/fm/plot_fm_vibrato_compare.py --out work/fm/figs/fm_compare_3cases.png \
+  --case work/fm/fm_vibrato.wav:Base:1:0.013636:0.30:69 \
+  --case work/fm/fm_vibrato_I060.wav:I=0.60st:1:0.013636:0.60:69 \
+  --case work/fm/fm_vibrato_fm7.wav:fm≈7Hz:1:0.015909:0.30:69
+```
+
+![alt text](work/fm/figs/fm_compare_3cases.png)
+
+
 - Use el instrumento para generar un sonido tipo clarinete y otro tipo campana. Tome los parámetros del
   sonido (N1, N2 e I) y de la envolvente ADSR del citado artículo. Con estos sonidos, genere sendas escalas
   diatónicas (fichero `doremi.sco`) y ponga el resultado en los ficheros `work/doremi/clarinete.wav` y
@@ -492,6 +543,30 @@ deberá venir expresado en semitonos.
   * También puede colgar en el directorio work/doremi otras escalas usando sonidos *interesantes*. Por
     ejemplo, violines, pianos, percusiones, espadas láser de la
 	[Guerra de las Galaxias](https://www.starwars.com/), etc.
+
+  #### Sonidos tipo clarinete y campana (escala diatónica)
+
+Se han tomado los **ratios** (`N1`, `N2`) y los **índices** del ejemplo *clarinet-like* y *bell-like* del
+artículo de Chowning. Como el instrumento `InstrumentFM` implementado usa un **índice constante** por nota,
+se usa el índice del estado estable en el caso clarinete (en el artículo aparece una transición 4→2).
+
+Ficheros:
+
+- `work/doremi/clarinete.orc`
+- `work/doremi/campana.orc`
+- `work/doremi.sco`
+
+Generación de las escalas:
+
+```bash
+./build/release/src/synth work/doremi/clarinete.orc work/doremi.sco work/doremi/clarinete.wav
+./build/release/src/synth work/doremi/campana.orc   work/doremi.sco work/doremi/campana.wav
+```
+
+Resultados:
+
+- `work/doremi/clarinete.wav`
+- `work/doremi/campana.wav` (y, por compatibilidad con el enunciado, también `work/doremi/campana.work`)
 
 ### Orquestación usando el programa synth.
 
@@ -504,6 +579,39 @@ Use el programa `synth` para generar canciones a partir de su partitura MIDI. Co
 - Coloque el resultado, junto con los ficheros necesarios para generarlo, en el directorio `work/music`.
 - Indique, a continuación, la orden necesaria para generar la señal (suponiendo que todos los archivos
   necesarios están en directorio indicado).
+
+#### Orquestación mínima: *You've got a friend in me*
+
+Ficheros colocados en `work/music/`:
+
+- `ToyStory_A_Friend_in_me.sco` (partitura)
+- `toystory.orc` (instrumentos)
+- `toystory.wav` (resultado)
+
+La orquestación asigna:
+
+- Canal 1: solista con `InstrumentFM`
+- Canal 2: bajo con `InstrumentFM`
+
+Comando para generar la señal (desde la raíz del proyecto):
+
+```bash
+./build/release/src/synth work/music/toystory.orc work/music/ToyStory_A_Friend_in_me.sco work/music/toystory.wav
+```
+
+#### Orquestación extra: *Hawaii5-0*
+
+Ficheros colocados en `work/music/`:
+
+- `Hawaii5-0.sco` (partitura)
+- `hawaii5_0.orc` (instrumentos)
+- `hawaii5_0.wav` (resultado)
+
+Comando para generar la señal (desde la raíz del proyecto):
+
+```bash
+./build/release/src/synth work/music/hawaii5_0.orc work/music/Hawaii5-0.sco work/music/hawaii5_0.wav
+```
 
 También puede orquestar otros temas más complejos, como la banda sonora de *Hawaii5-0* o el villacinco de
 John Lennon *Happy Xmas (War Is Over)* (fichero `The_Christmas_Song_Lennon.sco`), o cualquier otra canción

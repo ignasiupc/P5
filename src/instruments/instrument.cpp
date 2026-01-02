@@ -24,5 +24,6 @@ namespace upc {
       pInst = (Instrument *) new InstrumentFM(parameters);
     }
     return pInst;
+
   }
 }
