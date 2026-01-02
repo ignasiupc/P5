@@ -238,6 +238,12 @@ En el nostre cas es diu 'instrument_seno.cpp'
   sinusoidal. Deberá explicar detalladamente cómo se manifiestan los parámetros del efecto (frecuencia e
   índice de modulación) en la señal generada (se valorará que la explicación esté contenida en las propias
   gráficas, sin necesidad de *literatura*).
+
+![alt text](work/EFECTOS/figs/fig_tremolo.png)
+
+![alt text](work/EFECTOS/figs/fig_vibrato.png)
+
+
 - Si ha generado algún efecto por su cuenta, explique en qué consiste, cómo lo ha implementado y qué
   resultado ha producido. Incluya, en el directorio `work/ejemplos`, los ficheros necesarios para apreciar
   el efecto, e indique, a continuación, la orden necesaria para generar los ficheros de audio usando el
@@ -281,7 +287,7 @@ Ficheros creados:
 
 Para apreciar el efecto, hemos generado dos ficheros de audio a partir del mismo instrumento y la misma partitura, variando únicamente el parámetro global `g`:
 
-```bash
+
 synth -g 0.20 gain_instrument.orc gain_score.sco gain_g020.wav
 synth -g 0.80 gain_instrument.orc gain_score.sco gain_g080.wav
 
@@ -295,13 +301,7 @@ synth -g 0.80 gain_instrument.orc gain_score.sco gain_g080.wav
 
 ### Visualización del efecto en una gráfica
 
-Hemos generado la figura comparativa con:
 
-```bash
-python3 plot_gain.py \
-  --wav1 gain_g020.wav --label1 "g=0.20" \
-  --wav2 gain_g080.wav --label2 "g=0.80" \
-  --out gain_compare.png
 
 Qué se observa en la figura
 
@@ -311,9 +311,9 @@ En el panel de RMS móvil, la curva del caso g = 0.80 queda por encima de la de 
 
 Las medidas de pico y RMS aumentan aproximadamente de forma proporcional con g.
 
-Figura (Gain comparativo)
+Figura (Gain comparativo):
 
-(insertar aquí gain_compare.png)
+![alt text](work/EFECTOS/GAIN/gain_compare.png)
 
 ### Síntesis FM.
 
